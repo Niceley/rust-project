@@ -4,6 +4,7 @@ use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
+use ratatui::layout::{Constraint, Direction, Layout};
 
 fn cell(tile: Tile) -> (char, Color) {
     match tile {
@@ -16,6 +17,11 @@ fn cell(tile: Tile) -> (char, Color) {
 }
 
 pub fn draw(frame: &mut Frame, map: &Map) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(1), Constraint::Length(3)])
+        .split(frame.area());
+
     let mut lines = Vec::with_capacity(map.height as usize);
     for y in 0..map.height {
         let mut spans = Vec::with_capacity(map.width as usize);
@@ -26,9 +32,14 @@ pub fn draw(frame: &mut Frame, map: &Map) {
         }
         lines.push(Line::from(spans));
     }
-    let widget = Paragraph::new(Text::from(lines))
+    
+    let map_widget = Paragraph::new(Text::from(lines))
         .block(Block::default().borders(Borders::ALL).title(" Simulation "));
-    frame.render_widget(widget, frame.area());
+    frame.render_widget(map_widget, chunks[0]);
+
+    let footer = Paragraph::new("Énergie : 0   |   Cristaux : 0   |   (touche pour quitter)")
+        .block(Block::default().borders(Borders::ALL).title(" Ressources collectées "));
+    frame.render_widget(footer, chunks[1]);
 }
 
 #[cfg(test)]
