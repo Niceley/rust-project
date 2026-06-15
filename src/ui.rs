@@ -32,7 +32,7 @@ pub fn draw(frame: &mut Frame, map: &Map) {
         }
         lines.push(Line::from(spans));
     }
-    
+
     let map_widget = Paragraph::new(Text::from(lines))
         .block(Block::default().borders(Borders::ALL).title(" Simulation "));
     frame.render_widget(map_widget, chunks[0]);
@@ -49,5 +49,16 @@ mod tests {
     #[test]
     fn la_base_a_le_bon_symbole() {
         assert_eq!(cell(Tile::Base), ('#', Color::Rgb(228, 240, 212)));
+    }
+
+    #[test]
+    fn les_ressources_ont_les_bons_symboles() {
+        assert_eq!(cell(Tile::Resource(ResourceKind::Energy)).0, 'E');
+        assert_eq!(cell(Tile::Resource(ResourceKind::Crystal)).0, 'C');
+    }
+
+    #[test]
+    fn un_obstacle_est_affiche_en_o_majuscule() {
+        assert_eq!(cell(Tile::Obstacle).0, 'O');
     }
 }
