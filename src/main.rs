@@ -7,6 +7,8 @@ use crossterm::{
 };
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use crossterm::event::Event;
+use ratatui::backend::Backend;
 
 use resource_collection_sim::{config::SimConfig, map::Map, ui};
 
@@ -18,13 +20,25 @@ fn main() -> Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let config = SimConfig::default();
-    let map = Map::new(config.map_width, config.map_height);
-    terminal.draw(|frame| ui::draw(frame, &map))?;
-    let _ = event::read()?;
-
+    let result = run(&mut terminal);
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
+    result
+}
+
+fn run<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
+    while event::poll(std::time::Duration::from_millis(0))? {
+        event::read()?;
+    }
+
+    let config = SimConfig::default();
+    let map = Map::new(config.map_width, config.map_height);
+    loop {
+        terminal.draw(|frame| ui::draw(frame, &map))?;
+        if let Event::Key(_) = event::read()? {
+            break;
+        }
+    }
     Ok(())
 }
