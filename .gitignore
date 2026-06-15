@@ -1,0 +1,12 @@
+# Artefacts de compilation
+/target
+
+# Cargo.lock : À VERSIONNER (projet binaire => builds reproductibles).
+# Ne pas l'ignorer.
+
+# Éditeurs / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+*~

@@ -1,0 +1,32 @@
+[package]
+name = "rust-project"
+version = "0.1.0"
+edition = "2021"
+authors = [
+    "David W.",
+    "Thomas L.",
+    "Antoine H.",
+]
+description = "Simulation de robots collecteurs de ressources"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = "0.28"
+noise = "0.9"
+rand = "0.8"
+thiserror = "1"
+anyhow = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
