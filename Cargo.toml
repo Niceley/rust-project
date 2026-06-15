@@ -1,5 +1,5 @@
 [package]
-name = "rust-project"
+name = "resource_collection_sim"
 version = "0.1.0"
 edition = "2021"
 authors = [
