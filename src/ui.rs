@@ -1,10 +1,10 @@
 use crate::map::{Map, Tile};
 use crate::resource::ResourceKind;
+use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
-use ratatui::layout::{Constraint, Direction, Layout};
 
 fn cell(tile: Tile) -> (char, Color) {
     match tile {
@@ -12,7 +12,7 @@ fn cell(tile: Tile) -> (char, Color) {
         Tile::Obstacle => ('O', Color::Rgb(164, 226, 229)), // Cyan clair
         Tile::Resource(ResourceKind::Energy) => ('E', Color::Rgb(144, 209, 46)), // Vert
         Tile::Resource(ResourceKind::Crystal) => ('C', Color::Rgb(252, 204, 240)), // Magenta clair
-        Tile::Base => ('#', Color::Rgb(228, 240, 212)), // Vert clair
+        Tile::Base => ('#', Color::Rgb(228, 240, 212)),     // Vert clair
     }
 }
 
@@ -38,7 +38,11 @@ pub fn draw(frame: &mut Frame, map: &Map) {
     frame.render_widget(map_widget, chunks[0]);
 
     let footer = Paragraph::new("Énergie : 0   |   Cristaux : 0   |   (touche pour quitter)")
-        .block(Block::default().borders(Borders::ALL).title(" Ressources collectées "));
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(" Ressources collectées "),
+        );
     frame.render_widget(footer, chunks[1]);
 }
 

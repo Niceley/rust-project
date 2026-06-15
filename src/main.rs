@@ -1,14 +1,14 @@
 use std::io::{self, Write};
 
 use anyhow::Result;
+use crossterm::event::Event;
 use crossterm::{
     event, execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use ratatui::backend::Backend;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
-use crossterm::event::Event;
-use ratatui::backend::Backend;
 
 use resource_collection_sim::{config::SimConfig, map::Map, ui};
 
