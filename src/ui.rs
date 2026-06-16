@@ -1,6 +1,8 @@
 use crate::map::{Map, Tile};
 use crate::resource::ResourceKind;
 use crate::simulation::Simulation;
+use crate::robot::RobotKind;
+use crate::config::SimConfig;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
@@ -50,12 +52,11 @@ pub fn draw(frame: &mut Frame, sim: &Simulation) {
         .block(Block::default().borders(Borders::ALL).title(" Simulation "));
     frame.render_widget(map_widget, chunks[0]);
 
-    let footer = Paragraph::new("Énergie : 0   |   Cristaux : 0   |   (touche pour quitter)")
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(" Ressources collectées "),
-        );
+    let footer = Paragraph::new(format!(
+        "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   (touche pour quitter)",
+        sim.robots.len()
+    ))
+    .block(Block::default().borders(Borders::ALL).title(" Ressources collectées "));
     frame.render_widget(footer, chunks[1]);
 }
 
