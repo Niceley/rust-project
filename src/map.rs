@@ -1,6 +1,10 @@
+use std::collections::HashMap;
 use noise::{NoiseFn, Perlin};
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use crate::config::SimConfig;
-use crate::resource::ResourceKind;
+use crate::resource::{Resource, ResourceKind};
+
 pub type Position = (u16, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17,6 +21,7 @@ pub struct Map {
     pub height: u16,
     pub base: Position,
     tiles: Vec<Tile>,
+    resources: HashMap<Position, Resource>,
 }
 
 impl Map {
@@ -28,6 +33,7 @@ impl Map {
             height,
             base,
             tiles: vec![Tile::Empty; width as usize * height as usize],
+            resources: HashMap::new()
         };
         map.set(base.0, base.1, Tile::Base);
         map
@@ -37,7 +43,36 @@ impl Map {
     pub fn generate(config: &SimConfig) -> Self {
         let mut map = Self::new(config.map_width, config.map_height);
         map.generate_obstacles(config);
+        let mut rng = StdRng::seed_from_u64(u64::from(config.seed));
+        map.place_resources(config, &mut rng);
         map
+    }
+
+    fn place_resources(&mut self, config: &SimConfig, rng: &mut StdRng) {
+        let mut placed = 0;
+        let mut attempts = 0;
+        let max_attempts = config.num_resources * 50;
+
+        while placed < config.num_resources && attempts < max_attempts {
+            attempts += 1;
+            let x = rng.gen_range(0..self.width);
+            let y = rng.gen_range(0..self.height);
+
+            if self.get(x, y) != Some(Tile::Empty) {
+                continue;
+            }
+
+            let kind = if rng.gen_bool(0.5) {
+                ResourceKind::Energy
+            } else {
+                ResourceKind::Crystal
+            };
+
+            let quantity: u32 = rng.gen_range(50..=200);
+            self.set(x, y, Tile::Resource(kind));
+            self.resources.insert((x, y), Resource::new(kind, quantity));
+            placed += 1;
+        }
     }
 
     fn generate_obstacles(&mut self, config: &SimConfig) {
@@ -81,6 +116,11 @@ impl Map {
             let i = self.idx(x, y);
             self.tiles[i] = tile;
         }
+    }
+
+    #[must_use]
+    pub fn resource_at(&self, pos: Position) -> Option<&Resource> {
+        self.resources.get(&pos)
     }
 
     #[must_use]
