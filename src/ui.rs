@@ -1,5 +1,7 @@
-use crate::map::{Map, Tile};
+use crate::map::Tile;
 use crate::resource::ResourceKind;
+use crate::robot::RobotKind;
+use crate::simulation::Simulation;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
@@ -16,18 +18,29 @@ fn cell(tile: Tile) -> (char, Color) {
     }
 }
 
-pub fn draw(frame: &mut Frame, map: &Map) {
+fn cell_at(sim: &Simulation, x: u16, y: u16) -> (char, Color) {
+    if let Some(robot) = sim.robots.iter().find(|r| r.pos == (x, y)) {
+        let color = match robot.kind {
+            RobotKind::Scout => Color::Red,
+            RobotKind::Collector => Color::Magenta,
+        };
+        return (robot.symbol(), color);
+    }
+    cell(sim.map.get(x, y).unwrap_or(Tile::Empty))
+}
+
+pub fn draw(frame: &mut Frame, sim: &Simulation) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(1), Constraint::Length(3)])
         .split(frame.area());
+    let map = &sim.map;
 
     let mut lines = Vec::with_capacity(map.height as usize);
     for y in 0..map.height {
         let mut spans = Vec::with_capacity(map.width as usize);
         for x in 0..map.width {
-            let tile = map.get(x, y).unwrap_or(Tile::Empty);
-            let (ch, color) = cell(tile);
+            let (ch, color) = cell_at(sim, x, y);
             spans.push(Span::styled(ch.to_string(), Style::default().fg(color)));
         }
         lines.push(Line::from(spans));
@@ -37,18 +50,22 @@ pub fn draw(frame: &mut Frame, map: &Map) {
         .block(Block::default().borders(Borders::ALL).title(" Simulation "));
     frame.render_widget(map_widget, chunks[0]);
 
-    let footer = Paragraph::new("Énergie : 0   |   Cristaux : 0   |   (touche pour quitter)")
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(" Ressources collectées "),
-        );
+    let footer = Paragraph::new(format!(
+        "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   (touche pour quitter)",
+        sim.robots.len()
+    ))
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Ressources collectées "),
+    );
     frame.render_widget(footer, chunks[1]);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::SimConfig;
 
     #[test]
     fn la_base_a_le_bon_symbole() {
@@ -64,5 +81,12 @@ mod tests {
     #[test]
     fn un_obstacle_est_affiche_en_o_majuscule() {
         assert_eq!(cell(Tile::Obstacle).0, 'O');
+    }
+
+    #[test]
+    fn un_robot_est_dessine_par_dessus_la_tuile() {
+        let sim = Simulation::new(SimConfig::default());
+        let (bx, by) = sim.map.base;
+        assert_eq!(cell_at(&sim, bx, by).0, 'x'); // un éclaireur posé sur la base
     }
 }

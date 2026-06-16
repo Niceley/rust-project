@@ -10,7 +10,7 @@ use ratatui::backend::Backend;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 
-use resource_collection_sim::{config::SimConfig, map::Map, ui};
+use resource_collection_sim::{config::SimConfig, simulation::Simulation, ui};
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
@@ -32,10 +32,9 @@ fn run<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
         event::read()?;
     }
 
-    let config = SimConfig::default();
-    let map = Map::generate(&config);
+    let sim = Simulation::new(SimConfig::default());
     loop {
-        terminal.draw(|frame| ui::draw(frame, &map))?;
+        terminal.draw(|frame| ui::draw(frame, &sim))?;
         if let Event::Key(_) = event::read()? {
             break;
         }
