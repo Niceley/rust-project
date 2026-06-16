@@ -33,7 +33,7 @@ fn run<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
     }
 
     let config = SimConfig::default();
-    let map = Map::new(config.map_width, config.map_height);
+    let map = Map::generate(&config);
     loop {
         terminal.draw(|frame| ui::draw(frame, &map))?;
         if let Event::Key(_) = event::read()? {

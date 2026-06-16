@@ -1,3 +1,4 @@
+use crate::config::SimConfig;
 use crate::resource::ResourceKind;
 pub type Position = (u16, u16);
 
@@ -29,6 +30,11 @@ impl Map {
         };
         map.set(base.0, base.1, Tile::Base);
         map
+    }
+
+    #[must_use]
+    pub fn generate(config: &SimConfig) -> Self {
+        Self::new(config.map_width, config.map_height)
     }
 
     fn idx(&self, x: u16, y: u16) -> usize {
