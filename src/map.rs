@@ -1,3 +1,4 @@
+use noise::{NoiseFn, Perlin};
 use crate::config::SimConfig;
 use crate::resource::ResourceKind;
 pub type Position = (u16, u16);
@@ -34,7 +35,27 @@ impl Map {
 
     #[must_use]
     pub fn generate(config: &SimConfig) -> Self {
-        Self::new(config.map_width, config.map_height)
+        let mut map = Self::new(config.map_width, config.map_height);
+        map.generate_obstacles(config);
+        map
+    }
+
+    fn generate_obstacles(&mut self, config: &SimConfig) {
+        let perlin = Perlin::new(config.seed);
+        let scale = 0.12;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if (x, y) == self.base {
+                    continue;
+                }
+
+                let value = perlin.get([f64::from(x) * scale, f64::from(y) * scale]);
+
+                if value > config.obstacle_threshold {
+                    self.set(x, y, Tile::Obstacle);
+                }
+            }
+        }
     }
 
     fn idx(&self, x: u16, y: u16) -> usize {
