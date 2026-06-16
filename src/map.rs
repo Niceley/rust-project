@@ -43,6 +43,7 @@ impl Map {
     pub fn generate(config: &SimConfig) -> Self {
         let mut map = Self::new(config.map_width, config.map_height);
         map.generate_obstacles(config);
+        map.clear_around_base();
         let mut rng = StdRng::seed_from_u64(u64::from(config.seed));
         map.place_resources(config, &mut rng);
         map
@@ -88,6 +89,23 @@ impl Map {
 
                 if value > config.obstacle_threshold {
                     self.set(x, y, Tile::Obstacle);
+                }
+            }
+        }
+    }
+
+    fn clear_around_base(&mut self) {
+        let (bx, by) = self.base;
+        for dy in -1i32..=1 {
+            for dx in -1i32..=1 {
+                let nx = i32::from(bx) + dx;
+                let ny = i32::from(by) + dy;
+                if nx < 0 || ny < 0 {
+                    continue;
+                }
+                let (nx, ny) = (nx as u16, ny as u16);
+                if self.get(nx, ny) == Some(Tile::Obstacle) {
+                    self.set(nx, ny, Tile::Empty);
                 }
             }
         }
