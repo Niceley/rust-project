@@ -1,5 +1,6 @@
 use crate::map::{Map, Tile};
 use crate::resource::ResourceKind;
+use crate::simulation::Simulation;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
@@ -16,11 +17,12 @@ fn cell(tile: Tile) -> (char, Color) {
     }
 }
 
-pub fn draw(frame: &mut Frame, map: &Map) {
+pub fn draw(frame: &mut Frame, sim: &Simulation) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(1), Constraint::Length(3)])
         .split(frame.area());
+    let map = &sim.map;
 
     let mut lines = Vec::with_capacity(map.height as usize);
     for y in 0..map.height {
