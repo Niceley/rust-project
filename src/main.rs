@@ -34,6 +34,7 @@ fn run<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
 
     let config = SimConfig::default();
     let sim = Simulation::new(SimConfig::default());
+    let map = Map::generate(&config);
     loop {
         terminal.draw(|frame| ui::draw(frame, &sim))?;
         if let Event::Key(_) = event::read()? {
