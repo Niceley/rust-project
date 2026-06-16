@@ -4,5 +4,6 @@ pub mod map;
 pub mod resource;
 pub mod ui;
 pub mod robot;
+pub mod simulation;
 
 pub use error::{AppError, Result};
