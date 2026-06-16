@@ -1,10 +1,9 @@
-use std::collections::HashMap;
+use crate::config::SimConfig;
+use crate::resource::{Resource, ResourceKind};
 use noise::{NoiseFn, Perlin};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use crate::config::SimConfig;
-use crate::resource::{Resource, ResourceKind};
-
+use std::collections::HashMap;
 pub type Position = (u16, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,7 +32,7 @@ impl Map {
             height,
             base,
             tiles: vec![Tile::Empty; width as usize * height as usize],
-            resources: HashMap::new()
+            resources: HashMap::new(),
         };
         map.set(base.0, base.1, Tile::Base);
         map
