@@ -17,6 +17,17 @@ fn cell(tile: Tile) -> (char, Color) {
     }
 }
 
+fn cell_at(sim: &Simulation, x: u16, y: u16) -> (char, Color) {
+    if let Some(robot) = sim.robots.iter().find(|r| r.pos == (x, y)) {
+        let color = match robot.kind {
+            RobotKind::Scout => Color::Red,
+            RobotKind::Collector => Color::Magenta,
+        };
+        return (robot.symbol(), color);
+    }
+    cell(sim.map.get(x, y).unwrap_or(Tile::Empty))
+}
+
 pub fn draw(frame: &mut Frame, sim: &Simulation) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -66,5 +77,12 @@ mod tests {
     #[test]
     fn un_obstacle_est_affiche_en_o_majuscule() {
         assert_eq!(cell(Tile::Obstacle).0, 'O');
+    }
+
+    #[test]
+    fn un_robot_est_dessine_par_dessus_la_tuile() {
+        let sim = Simulation::new(SimConfig::default());
+        let (bx, by) = sim.map.base;
+        assert_eq!(cell_at(&sim, bx, by).0, 'x'); // un éclaireur posé sur la base
     }
 }
