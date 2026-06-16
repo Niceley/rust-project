@@ -164,6 +164,43 @@ mod tests {
         map.set(2, 2, Tile::Obstacle);
         assert!(!map.is_walkable(2, 2));
         assert!(map.is_walkable(0, 0));
-        assert!(!map.is_walkable(99, 99)); // hors limites
+        assert!(!map.is_walkable(99, 99));
+    }
+
+    #[test]
+    fn la_generation_preserve_la_base() {
+        let map = Map::generate(&SimConfig::default());
+        assert_eq!(map.get(map.base.0, map.base.1), Some(Tile::Base));
+    }
+
+    #[test]
+    fn la_generation_place_le_bon_nombre_de_ressources() {
+        let config = SimConfig::default();
+        let map = Map::generate(&config);
+        let count = (0..map.height)
+            .flat_map(|y| (0..map.width).map(move |x| (x, y)))
+            .filter(|&(x, y)| matches!(map.get(x, y), Some(Tile::Resource(_))))
+            .count();
+        assert_eq!(count, config.num_resources);
+    }
+
+    #[test]
+    fn les_ressources_ont_une_quantite_valide() {
+        let map = Map::generate(&SimConfig::default());
+        for resource in map.resources.values() {
+            assert!((50..=200).contains(&resource.quantity));
+        }
+    }
+
+    #[test]
+    fn la_generation_est_deterministe_pour_une_graine() {
+        let config = SimConfig::default();
+        let a = Map::generate(&config);
+        let b = Map::generate(&config);
+        for y in 0..config.map_height {
+            for x in 0..config.map_width {
+                assert_eq!(a.get(x, y), b.get(x, y));
+            }
+        }
     }
 }
