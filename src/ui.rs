@@ -1,8 +1,7 @@
-use crate::map::{Map, Tile};
+use crate::map::Tile;
 use crate::resource::ResourceKind;
-use crate::simulation::Simulation;
 use crate::robot::RobotKind;
-use crate::config::SimConfig;
+use crate::simulation::Simulation;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span, Text};
@@ -41,8 +40,7 @@ pub fn draw(frame: &mut Frame, sim: &Simulation) {
     for y in 0..map.height {
         let mut spans = Vec::with_capacity(map.width as usize);
         for x in 0..map.width {
-            let tile = map.get(x, y).unwrap_or(Tile::Empty);
-            let (ch, color) = cell(tile);
+            let (ch, color) = cell_at(sim, x, y);
             spans.push(Span::styled(ch.to_string(), Style::default().fg(color)));
         }
         lines.push(Line::from(spans));
@@ -56,13 +54,18 @@ pub fn draw(frame: &mut Frame, sim: &Simulation) {
         "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   (touche pour quitter)",
         sim.robots.len()
     ))
-    .block(Block::default().borders(Borders::ALL).title(" Ressources collectées "));
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Ressources collectées "),
+    );
     frame.render_widget(footer, chunks[1]);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::SimConfig;
 
     #[test]
     fn la_base_a_le_bon_symbole() {

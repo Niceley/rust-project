@@ -11,7 +11,7 @@ pub struct Simulation {
 impl Simulation {
     #[must_use]
     pub fn new(config: SimConfig) -> Self {
-        let map = Map::new(config.map_width, config.map_height);
+        let map = Map::generate(&config);
 
         let scouts = (0..config.num_scouts).map(|_| RobotKind::Scout);
         let collectors = (0..config.num_collectors).map(|_| RobotKind::Collector);
