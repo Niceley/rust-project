@@ -1,12 +1,15 @@
 use crate::config::SimConfig;
 use crate::map::Map;
 use crate::robot::{Robot, RobotKind};
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 pub struct Simulation {
     pub config: SimConfig,
     pub map: Map,
     pub robots: Vec<Robot>,
     pub tick: u64,
+    rng: StdRng,
 }
 
 impl Simulation {
@@ -21,17 +24,22 @@ impl Simulation {
             .enumerate()
             .map(|(id, kind)| Robot::new(id, kind, map.base))
             .collect();
+        let rng = StdRng::seed_from_u64(u64::from(config.seed).wrapping_add(1));
 
         Self {
             config,
             map,
             robots,
             tick: 0,
+            rng,
         }
     }
 
     pub fn update(&mut self) {
         self.tick += 1;
+        for robot in &mut self.robots {
+            robot.step(&self.map, &mut self.rng);
+        }
     }
 }
 
