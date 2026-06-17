@@ -38,6 +38,7 @@ impl Robot {
     pub fn step(&mut self, map: &Map, rng: &mut impl Rng) {
         match self.kind {
             RobotKind::Scout => self.wander(map, rng),
+            RobotKind::Collector => {}
         }
     }
 
