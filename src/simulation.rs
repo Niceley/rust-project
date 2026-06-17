@@ -6,6 +6,7 @@ pub struct Simulation {
     pub config: SimConfig,
     pub map: Map,
     pub robots: Vec<Robot>,
+    pub tick: u64,
 }
 
 impl Simulation {
@@ -25,7 +26,12 @@ impl Simulation {
             config,
             map,
             robots,
+            tick: 0,
         }
+    }
+
+    pub fn update(&mut self) {
+        self.tick += 1;
     }
 }
 
