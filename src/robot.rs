@@ -81,7 +81,16 @@ mod tests {
     #[test]
     fn un_eclaireur_n_entre_pas_dans_un_obstacle() {
         let mut map = Map::new(3, 3);
-        for (x, y) in [(0,0),(1,0),(2,0),(0,1),(2,1),(0,2),(1,2),(2,2)] {
+        for (x, y) in [
+            (0, 0),
+            (1, 0),
+            (2, 0),
+            (0, 1),
+            (2, 1),
+            (0, 2),
+            (1, 2),
+            (2, 2),
+        ] {
             map.set(x, y, Tile::Obstacle);
         }
         let mut rng = StdRng::seed_from_u64(0);
@@ -91,5 +100,4 @@ mod tests {
         }
         assert_eq!(scout.pos, (1, 1));
     }
-
 }
