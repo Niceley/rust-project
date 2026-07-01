@@ -11,6 +11,7 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 
 use resource_collection_sim::{config::SimConfig, simulation::Simulation, ui};
+use std::time::{Duration, Instant};
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
@@ -28,15 +29,29 @@ fn main() -> Result<()> {
 }
 
 fn run<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
-    while event::poll(std::time::Duration::from_millis(0))? {
+    while event::poll(Duration::ZERO)? {
         event::read()?;
     }
 
-    let sim = Simulation::new(SimConfig::default());
+    let mut sim = Simulation::new(SimConfig::default());
+    let tick_rate = sim.config.tick_rate;
+    let mut last_tick = Instant::now();
+
     loop {
         terminal.draw(|frame| ui::draw(frame, &sim))?;
-        if let Event::Key(_) = event::read()? {
-            break;
+
+        let timeout = tick_rate
+            .checked_sub(last_tick.elapsed())
+            .unwrap_or(Duration::ZERO);
+        if event::poll(timeout)? {
+            if let Event::Key(_) = event::read()? {
+                break;
+            }
+        }
+
+        if last_tick.elapsed() >= tick_rate {
+            sim.update();
+            last_tick = Instant::now();
         }
     }
     Ok(())

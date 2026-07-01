@@ -51,8 +51,9 @@ pub fn draw(frame: &mut Frame, sim: &Simulation) {
     frame.render_widget(map_widget, chunks[0]);
 
     let footer = Paragraph::new(format!(
-        "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   (touche pour quitter)",
-        sim.robots.len()
+        "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   Ticks : {}   |   (touche pour quitter)",
+        sim.robots.len(),
+        sim.tick
     ))
     .block(
         Block::default()
