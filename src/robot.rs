@@ -1,7 +1,7 @@
+use crate::comms::{Message, MessageSender};
 use crate::map::{Map, Position, Tile};
 use crate::resource::ResourceKind;
 use rand::Rng;
-use crate::comms::{Message, MessageSender};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RobotKind {
@@ -51,14 +51,21 @@ impl Robot {
     fn report_surroundings(&self, map: &Map, tx: &MessageSender) {
         for dy in -1i32..=1 {
             for dx in -1i32..=1 {
-                if dx == 0 && dy == 0 { continue; }
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
                 let nx = i32::from(self.pos.0) + dx;
                 let ny = i32::from(self.pos.1) + dy;
-                if nx < 0 || ny < 0 { continue; }
+                if nx < 0 || ny < 0 {
+                    continue;
+                }
                 let (nx, ny) = (nx as u16, ny as u16);
                 match map.get(nx, ny) {
                     Some(Tile::Resource(kind)) => {
-                        let _ = tx.send(Message::ResourceDiscovered { pos: (nx, ny), kind });
+                        let _ = tx.send(Message::ResourceDiscovered {
+                            pos: (nx, ny),
+                            kind,
+                        });
                     }
                     Some(Tile::Obstacle) => {
                         let _ = tx.send(Message::ObstacleDiscovered { pos: (nx, ny) });

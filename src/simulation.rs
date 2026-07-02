@@ -1,10 +1,10 @@
+use crate::base::Base;
+use crate::comms::{message_channel, MessageReceiver, MessageSender};
 use crate::config::SimConfig;
 use crate::map::Map;
 use crate::robot::{Robot, RobotKind};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
-use crate::base::Base;
-use crate::comms::{message_channel, MessageReceiver, MessageSender};
 
 pub struct Simulation {
     pub config: SimConfig,
@@ -21,7 +21,7 @@ impl Simulation {
     #[must_use]
     pub fn new(config: SimConfig) -> Self {
         let map = Map::generate(&config);
-        let base = Base::new(map.base);   // nouveau
+        let base = Base::new(map.base);
         let rng = StdRng::seed_from_u64(u64::from(config.seed).wrapping_add(1));
         let (tx, rx) = message_channel();
 

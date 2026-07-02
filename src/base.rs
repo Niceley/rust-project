@@ -12,13 +12,20 @@ pub struct Base {
 impl Base {
     #[must_use]
     pub fn new(pos: Position) -> Self {
-        Self { pos, ..Self::default() }
+        Self {
+            pos,
+            ..Self::default()
+        }
     }
 
     pub fn handle_message(&mut self, msg: &Message) {
         match msg {
-            Message::ResourceDiscovered { pos, .. } => { self.known_resources.insert(*pos); }
-            Message::ObstacleDiscovered { pos } => { self.known_obstacles.insert(*pos); }
+            Message::ResourceDiscovered { pos, .. } => {
+                self.known_resources.insert(*pos);
+            }
+            Message::ObstacleDiscovered { pos } => {
+                self.known_obstacles.insert(*pos);
+            }
         }
     }
 }
