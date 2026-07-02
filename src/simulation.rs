@@ -3,19 +3,27 @@ use crate::map::Map;
 use crate::robot::{Robot, RobotKind};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
+use crate::base::Base;
+use crate::comms::{message_channel, MessageReceiver, MessageSender};
 
 pub struct Simulation {
     pub config: SimConfig,
     pub map: Map,
     pub robots: Vec<Robot>,
-    pub tick: u64,
+    pub base: Base,
+    pub ticks: u64,
     rng: StdRng,
+    tx: MessageSender,
+    rx: MessageReceiver,
 }
 
 impl Simulation {
     #[must_use]
     pub fn new(config: SimConfig) -> Self {
         let map = Map::generate(&config);
+        let base = Base::new(map.base);   // nouveau
+        let rng = StdRng::seed_from_u64(u64::from(config.seed).wrapping_add(1));
+        let (tx, rx) = message_channel();
 
         let scouts = (0..config.num_scouts).map(|_| RobotKind::Scout);
         let collectors = (0..config.num_collectors).map(|_| RobotKind::Collector);
@@ -24,21 +32,26 @@ impl Simulation {
             .enumerate()
             .map(|(id, kind)| Robot::new(id, kind, map.base))
             .collect();
-        let rng = StdRng::seed_from_u64(u64::from(config.seed).wrapping_add(1));
 
         Self {
             config,
             map,
             robots,
-            tick: 0,
+            base,
+            ticks: 0,
             rng,
+            tx,
+            rx,
         }
     }
 
     pub fn update(&mut self) {
-        self.tick += 1;
+        self.ticks += 1;
         for robot in &mut self.robots {
-            robot.step(&self.map, &mut self.rng);
+            robot.step(&self.map, &mut self.rng, &self.tx);
+        }
+        while let Ok(msg) = self.rx.try_recv() {
+            self.base.handle_message(&msg);
         }
     }
 }

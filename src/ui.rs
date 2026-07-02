@@ -53,7 +53,7 @@ pub fn draw(frame: &mut Frame, sim: &Simulation) {
     let footer = Paragraph::new(format!(
         "Énergie : 0   |   Cristaux : 0   |   Robots : {}   |   Ticks : {}   |   (touche pour quitter)",
         sim.robots.len(),
-        sim.tick
+        sim.ticks
     ))
     .block(
         Block::default()
