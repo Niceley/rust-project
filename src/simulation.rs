@@ -78,4 +78,13 @@ mod tests {
             assert_eq!(robot.pos, sim.map.base);
         }
     }
+
+    #[test]
+    fn la_base_apprend_en_explorant() {
+        let mut sim = Simulation::new(SimConfig::default());
+        for _ in 0..500 {
+            sim.update();
+        }
+        assert!(!sim.base.known_obstacles.is_empty());
+    }
 }
