@@ -1,4 +1,5 @@
-use crate::map::{Map, Position};
+use crate::comms::{Message, MessageSender};
+use crate::map::{Map, Position, Tile};
 use crate::resource::ResourceKind;
 use rand::Rng;
 
@@ -35,10 +36,43 @@ impl Robot {
         }
     }
 
-    pub fn step(&mut self, map: &Map, rng: &mut impl Rng) {
+    pub fn step(&mut self, map: &Map, rng: &mut impl Rng, tx: &MessageSender) {
         match self.kind {
-            RobotKind::Scout => self.wander(map, rng),
+            RobotKind::Scout => self.scout_step(map, rng, tx),
             RobotKind::Collector => {}
+        }
+    }
+
+    fn scout_step(&mut self, map: &Map, rng: &mut impl Rng, tx: &MessageSender) {
+        self.wander(map, rng);
+        self.report_surroundings(map, tx);
+    }
+
+    fn report_surroundings(&self, map: &Map, tx: &MessageSender) {
+        for dy in -1i32..=1 {
+            for dx in -1i32..=1 {
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+                let nx = i32::from(self.pos.0) + dx;
+                let ny = i32::from(self.pos.1) + dy;
+                if nx < 0 || ny < 0 {
+                    continue;
+                }
+                let (nx, ny) = (nx as u16, ny as u16);
+                match map.get(nx, ny) {
+                    Some(Tile::Resource(kind)) => {
+                        let _ = tx.send(Message::ResourceDiscovered {
+                            pos: (nx, ny),
+                            kind,
+                        });
+                    }
+                    Some(Tile::Obstacle) => {
+                        let _ = tx.send(Message::ObstacleDiscovered { pos: (nx, ny) });
+                    }
+                    _ => {}
+                }
+            }
         }
     }
 
@@ -60,6 +94,7 @@ impl Robot {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::comms::message_channel;
     use crate::map::Tile;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
@@ -94,9 +129,10 @@ mod tests {
             map.set(x, y, Tile::Obstacle);
         }
         let mut rng = StdRng::seed_from_u64(0);
+        let (tx, _rx) = message_channel();
         let mut scout = Robot::new(0, RobotKind::Scout, (1, 1));
         for _ in 0..20 {
-            scout.step(&map, &mut rng);
+            scout.step(&map, &mut rng, &tx);
         }
         assert_eq!(scout.pos, (1, 1));
     }
